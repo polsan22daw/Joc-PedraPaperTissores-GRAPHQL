@@ -2,80 +2,95 @@
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
- 
+
 // schema de GraphQL, ! vol dir que NO POT SER NULL
 const esquema = buildSchema(`
 input partidaInput {
-    numJugador: Int!
-    puntuacio: Int!
-    tipusMoviment: String!
-    torn: Int!
+    jugador: String = ""
+    moviment: String = ""
+    torn: String = "jug1"
+    vicJug1: Int = 0
+    vicJug2: Int = 0
 }
-type partida {
-    codi: Int!
-    numJugador: Int!
-    puntuacio: Int!
-    tipusMoviment: String!
-    torn: Int!
+type Partida {
+    codiPartida: ID!
+    jugador: String
+    moviment: String
+    torn: String!
+    vicJug1: Int!
+    vicJug2: Int!
 }
+
 type Query {
-    partidesActives: [partida]
+    consultarPartides: [Partida]
 }
 type Mutation {
-    crearPartida(codi: Int!, input: partidaInput): partida
-    acabarPartida(codi: Int!, numJugador: Int!): Boolean
-    tirarMoviment(codi: Int!, numJugador: Int!, tipusMoviment: String!): Boolean
+    crearPartida(codiPartida: ID!, input: partidaInput): Partida
+    acabarPartida(codiPartida: ID!, jugador: String!): Boolean
+    tirarMoviment(codiPartida: ID!, jugador: String!, moviment: String!): Boolean
 }
 `);
+// como crear una partida
+// mutation {
+//     crearPartida(codiPartida: 1, input: {jugador: "jug1", moviment: "piedra", torn: "jug1", vicJug1: 0, vicJug2: 0}) {
+//         codiPartida
+//         jugador
+//         moviment
+//         torn
+//         vicJug1
+//         vicJug2
+//     }
+// }
+
  
 // aquesta arrel té una funció per a cada endpoint de l'API
 
-// Normalment seria una BD
+let partides = [];
+
 const arrel = {
-    partidesActives: () => {
+    consultarPartides: () => {
         return partides;
     },
     crearPartida: ({ codi, input }) => {
-        let partid = new partida(codi, input.numJugador, input.puntuacio, input.tipusMoviment, input.torn);
-        partides.push(partid);
-        return partid;
+        let novaPartida = partides.find(p => p.codiPartida == codi);
+        if (novaPartida) {
+            return novaPartida;
+        }
+        novaPartida = new Partida(codi, input);
+        partides.push(novaPartida);
+        return novaPartida;
     },
-    acabarPartida: ({ codi, numJugador }) => {
+    acabarPartida: ({ codi, jugador }) => {
         let partid = partides.find(p => p.codiPartida == codi);
         if (partid) {
-            partid.numJugador = numJugador;
+            partid.jugador = jugador;
             return true;
         }
         return false;
     },
-    tirarMoviment: ({ codi, numJugador, tipusMoviment }) => {
+    tirarMoviment: ({ codi, jugador, moviment }) => {
         let partid = partides.find(p => p.codiPartida == codi);
         if (partid) {
-            partid.numJugador = numJugador;
-            partid.tipusMoviment = tipusMoviment;
+            partid.jugador = jugador;
+            partid.moviment = moviment;
             return true;
         }
         return false;
     }
 };
 
-class partida {
-    constructor(codiPartida, numJugador, puntuacio, tipusMoviment, torn) {
-        this.codiPartida = codiPartida;
-        this.numJugador = numJugador;
-        this.puntuacio = puntuacio;
-        this.tipusMoviment = tipusMoviment;
-        this.torn = torn;
+class Partida {
+    constructor(codiPartida, {jugador, moviment, torn, vicJug1, vicJug2}) {
+      this.codiPartida = codiPartida;
+      this.jugador = jugador;
+      this.moviment = moviment;
+      this.torn = torn;
+      this.vicJug1 = vicJug1;
+      this.vicJug2 = vicJug2;
     }
 }
 
-class moviment {
-    constructor(tipusMoviment) {
-        this.tipusMoviment = tipusMoviment;
-    }
-}
 
-let partides = [];
 
 const app = express();
 app.use('/graphql', graphqlHTTP({
