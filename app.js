@@ -6,70 +6,57 @@ const { buildSchema } = require('graphql');
 // schema de GraphQL, ! vol dir que NO POT SER NULL
 const esquema = buildSchema(`
 input partidaInput {
-    jugador: String = ""
-    moviment: String = ""
-    torn: String = "jug1"
-    vicJug1: Int = 0
-    vicJug2: Int = 0
+    jugador: String
+    moviment: String
+    torn: String
+    vicJug1: Int
+    vicJug2: Int
 }
 type Partida {
     codiPartida: ID!
     jugador: String
     moviment: String
-    torn: String!
-    vicJug1: Int!
-    vicJug2: Int!
+    torn: String
+    vicJug1: Int
+    vicJug2: Int
 }
 
 type Query {
     consultarPartides: [Partida]
+    consultarPartida(codiPartida: ID!): Partida
 }
 type Mutation {
     crearPartida(codiPartida: ID!, input: partidaInput): Partida
-    acabarPartida(codiPartida: ID!, jugador: String!): Boolean
+    acabarPartida(codiPartida: ID!): Boolean
     tirarMoviment(codiPartida: ID!, jugador: String!, moviment: String!): Boolean
 }
 `);
-// como crear una partida
-// mutation {
-//     crearPartida(codiPartida: 1, input: {jugador: "jug1", moviment: "piedra", torn: "jug1", vicJug1: 0, vicJug2: 0}) {
-//         codiPartida
-//         jugador
-//         moviment
-//         torn
-//         vicJug1
-//         vicJug2
-//     }
-// }
-
  
 // aquesta arrel té una funció per a cada endpoint de l'API
 
-let partides = [];
+const partides = {};
 
 const arrel = {
     consultarPartides: () => {
-        return partides;
+        return Object.keys(partides).map(codiPartida => new Partida(codiPartida, partides[codiPartida]));
     },
-    crearPartida: ({ codi, input }) => {
-        let novaPartida = partides.find(p => p.codiPartida == codi);
+    consultarPartida: ({ codiPartida }) => {
+        return partides[codiPartida];
+    },
+    crearPartida: ({ codiPartida, input }) => {
+        let novaPartida = partides.find(p => p.codiPartida == codiPartida);
         if (novaPartida) {
             return novaPartida;
         }
-        novaPartida = new Partida(codi, input);
+        novaPartida = new Partida(codiPartida, input);
         partides.push(novaPartida);
         return novaPartida;
     },
-    acabarPartida: ({ codi, jugador }) => {
-        let partid = partides.find(p => p.codiPartida == codi);
-        if (partid) {
-            partid.jugador = jugador;
-            return true;
-        }
-        return false;
+    acabarPartida: ({ codiPartida }) => {
+        delete partides[codiPartida];
     },
-    tirarMoviment: ({ codi, jugador, moviment }) => {
-        let partid = partides.find(p => p.codiPartida == codi);
+    tirarMoviment: ({ codiPartida, jugador, moviment }) => {
+        let partid = partides.find(p => p.codiPartida == codiPartida);
         if (partid) {
             partid.jugador = jugador;
             partid.moviment = moviment;
