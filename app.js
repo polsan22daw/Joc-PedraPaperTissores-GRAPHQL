@@ -28,13 +28,16 @@ type Query {
 type Mutation {
     crearPartida(codiPartida: ID!, input: partidaInput): Partida
     acabarPartida(codiPartida: ID!): String
-    tirarMoviment(codiPartida: ID!, jugador: String!, moviment: String!): Boolean
+    tirarMoviment(codiPartida: ID!, jugador: String!, moviment: String!): String
 }
 `);
  
 // aquesta arrel té una funció per a cada endpoint de l'API
 
 let partides = [];
+movJug1 = "";
+movJug2 = "";
+contador = 0;
 
 const arrel = {
     consultarPartides: () => {
@@ -64,14 +67,61 @@ const arrel = {
         partides.splice(index, 1);
         return "Partida eliminada!";
     },
-    tirarMoviment: ({ codi, jugador, moviment }) => {
-        let partida = partides.find(p => p.codiPartida == codi);
-        if (partida) {
-            partida.jugador = jugador;
-            partida.moviment = moviment;
-            return true;
+    tirarMoviment: ({ codiPartida, jugador, moviment }) => {
+        let partida = partides.find(p => p.codiPartida == codiPartida);
+        if (!partida) {
+            return "La partida no existeix!";
         }
-        return false;
+        if (partida.torn == jugador) {
+            partida.jugador = jugador;
+            partida.moviment = "????";
+            if (partida.torn == "jug1") {
+                movJug1 = moviment;
+                partida.torn = "jug2";
+                ++contador;
+            }else{
+                movJug2 = moviment;
+                partida.torn = "jug1";
+                ++contador;
+            }
+        }else{
+            return "No es el teu torn, espera a que l'altre jugador faci el seu moviment";
+        }
+        if(partida.vicJug1 == 3){
+            return "FELICITATS jugador 1, has guanyat!";
+        }else if (partida.vicJug2 == 3){
+            return "FELICITATS jugador 2, has guanyat!";
+        }else{
+            if (contador == 2) {
+                contador = 0;
+                if (movJug1 == "paper" && movJug2 == "pedra") {
+                    partida.vicJug1++;
+                    return "El jugador 1 ha escollit PAPER, el Jugador 2 PEDRA. El Jugador 1 ha guanyat aquesta ronda";
+                }else if (movJug1 == "pedra" && movJug2 == "paper") {
+                    partida.vicJug2++;
+                    return "El jugador 1 ha escollit PEDRA, el Jugador 2 PAPER. El Jugador 2 ha guanyat aquesta ronda";
+                }else if (movJug1 == "paper" && movJug2 == "tisores") {
+                    partida.vicJug2++;
+                    return "El jugador 1 ha escollit PAPER, el Jugador 2 TISORES. El Jugador 2 ha guanyat aquesta ronda";
+                }else if (movJug1 == "tisores" && movJug2 == "paper") {
+                    partida.vicJug1++;
+                    return "El jugador 1 ha escollit TISORES, el Jugador 2 PAPER. El Jugador 1 ha guanyat aquesta ronda";
+                }else if (movJug1 == "pedra" && movJug2 == "tisores") {
+                    partida.vicJug1++;
+                    return "El jugador 1 ha escollit PEDRA, el Jugador 2 TISORES. El Jugador 1 ha guanyat aquesta ronda";
+                }else if (movJug1 == "tisores" && movJug2 == "pedra") {
+                    partida.vicJug2++;
+                    return "El jugador 1 ha escollit TISORES, el Jugador 2 PEDRA. El Jugador 2 ha guanyat aquesta ronda";
+                }else if(movJug1 == movJug2){
+                    movJug1 = "";
+                    movJug2 = "";
+                    partida.torn = "jug1";
+                    return "Els dos jugadors heu triat "+moviment +".Es un EMPAT!";
+                }
+            }else{
+                return "El jugador " + partida.torn + " ha de fer el seu moviment!";
+            }
+        }
     }
 };
 
