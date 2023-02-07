@@ -6,14 +6,14 @@ const { buildSchema } = require('graphql');
 // schema de GraphQL, ! vol dir que NO POT SER NULL
 const esquema = buildSchema(`
 input partidaInput {
-    jugador: String
-    moviment: String
-    torn: String
-    vicJug1: Int
-    vicJug2: Int
+    jugador: String = ""
+    moviment: String = ""
+    torn: String = "jug1"
+    vicJug1: Int = 0
+    vicJug2: Int = 0
 }
 type Partida {
-    codiPartida: ID!
+    codiPartida: ID
     jugador: String
     moviment: String
     torn: String
@@ -27,39 +27,48 @@ type Query {
 }
 type Mutation {
     crearPartida(codiPartida: ID!, input: partidaInput): Partida
-    acabarPartida(codiPartida: ID!): Boolean
+    acabarPartida(codiPartida: ID!): String
     tirarMoviment(codiPartida: ID!, jugador: String!, moviment: String!): Boolean
 }
 `);
  
 // aquesta arrel té una funció per a cada endpoint de l'API
 
-const partides = {};
+let partides = [];
 
 const arrel = {
     consultarPartides: () => {
-        return Object.keys(partides).map(codiPartida => new Partida(codiPartida, partides[codiPartida]));
+        return partides;
     },
-    consultarPartida: ({ codiPartida }) => {
-        return partides[codiPartida];
-    },
+    consultarPartida: ({codiPartida}) => {
+        let partida = partides.find(p => p.codiPartida == codiPartida);
+        if (partida) {
+            return partida;
+        }
+        return null;
+        },
     crearPartida: ({ codiPartida, input }) => {
-        let novaPartida = partides.find(p => p.codiPartida == codiPartida);
-        if (novaPartida) {
-            return novaPartida;
+        if (partides.find(p => p.codiPartida == codiPartida)) {
+            return "a";
         }
         novaPartida = new Partida(codiPartida, input);
         partides.push(novaPartida);
         return novaPartida;
     },
     acabarPartida: ({ codiPartida }) => {
-        delete partides[codiPartida];
+        let partida = partides.find(p => p.codiPartida == codiPartida);
+        if (!partida) {
+            return "No pots eliminar una partida que no existeix!";
+        }
+        let index = partides.indexOf(partida);
+        partides.splice(index, 1);
+        return "Partida eliminada!";
     },
-    tirarMoviment: ({ codiPartida, jugador, moviment }) => {
-        let partid = partides.find(p => p.codiPartida == codiPartida);
-        if (partid) {
-            partid.jugador = jugador;
-            partid.moviment = moviment;
+    tirarMoviment: ({ codi, jugador, moviment }) => {
+        let partida = partides.find(p => p.codiPartida == codi);
+        if (partida) {
+            partida.jugador = jugador;
+            partida.moviment = moviment;
             return true;
         }
         return false;
@@ -76,8 +85,6 @@ class Partida {
       this.vicJug2 = vicJug2;
     }
 }
-
-
 
 const app = express();
 app.use('/graphql', graphqlHTTP({
