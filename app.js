@@ -87,40 +87,71 @@ const arrel = {
         }else{
             return "No es el teu torn, espera a que l'altre jugador faci el seu moviment";
         }
-        if(partida.vicJug1 == 3){
-            return "FELICITATS jugador 1, has guanyat!";
-        }else if (partida.vicJug2 == 3){
-            return "FELICITATS jugador 2, has guanyat!";
-        }else{
-            if (contador == 2) {
-                contador = 0;
-                if (movJug1 == "paper" && movJug2 == "pedra") {
-                    partida.vicJug1++;
+        if (contador == 2) {
+            contador = 0;
+            if (movJug1 == "paper" && movJug2 == "pedra") {
+                partida.vicJug1++;
+                if(partida.vicJug1 == 3){
+                    return "FELICITATS jugador 1, has guanyat!";
+                }else if (partida.vicJug2 == 3){
+                    return "FELICITATS jugador 2, has guanyat!";
+                }else{
                     return "El jugador 1 ha escollit PAPER, el Jugador 2 PEDRA. El Jugador 1 ha guanyat aquesta ronda";
-                }else if (movJug1 == "pedra" && movJug2 == "paper") {
-                    partida.vicJug2++;
-                    return "El jugador 1 ha escollit PEDRA, el Jugador 2 PAPER. El Jugador 2 ha guanyat aquesta ronda";
-                }else if (movJug1 == "paper" && movJug2 == "tisores") {
-                    partida.vicJug2++;
-                    return "El jugador 1 ha escollit PAPER, el Jugador 2 TISORES. El Jugador 2 ha guanyat aquesta ronda";
-                }else if (movJug1 == "tisores" && movJug2 == "paper") {
-                    partida.vicJug1++;
-                    return "El jugador 1 ha escollit TISORES, el Jugador 2 PAPER. El Jugador 1 ha guanyat aquesta ronda";
-                }else if (movJug1 == "pedra" && movJug2 == "tisores") {
-                    partida.vicJug1++;
-                    return "El jugador 1 ha escollit PEDRA, el Jugador 2 TISORES. El Jugador 1 ha guanyat aquesta ronda";
-                }else if (movJug1 == "tisores" && movJug2 == "pedra") {
-                    partida.vicJug2++;
-                    return "El jugador 1 ha escollit TISORES, el Jugador 2 PEDRA. El Jugador 2 ha guanyat aquesta ronda";
-                }else if(movJug1 == movJug2){
-                    movJug1 = "";
-                    movJug2 = "";
-                    partida.torn = "jug1";
-                    return "Els dos jugadors heu triat "+moviment +".Es un EMPAT!";
                 }
-            }else{
-                return "El jugador " + partida.torn + " ha de fer el seu moviment!";
+            }else if (movJug1 == "pedra" && movJug2 == "paper") {
+                partida.vicJug2++;
+                if(partida.vicJug1 == 3){
+                    return "FELICITATS jugador 1, has guanyat!";
+                }else if (partida.vicJug2 == 3){
+                    return "FELICITATS jugador 2, has guanyat!";
+                }else{
+                    return "El jugador 1 ha escollit PEDRA, el Jugador 2 PAPER. El Jugador 2 ha guanyat aquesta ronda";   
+                }
+            }else if (movJug1 == "paper" && movJug2 == "tisores") {
+                partida.vicJug2++;
+                if(partida.vicJug1 == 3){
+                    return "FELICITATS jugador 1, has guanyat!";
+                }else if (partida.vicJug2 == 3){
+                    return "FELICITATS jugador 2, has guanyat!";
+                }else{
+                    return "El jugador 1 ha escollit PAPER, el Jugador 2 TISORES. El Jugador 2 ha guanyat aquesta ronda";
+                }
+            }else if (movJug1 == "tisores" && movJug2 == "paper") {
+                partida.vicJug1++;
+                if(partida.vicJug1 == 3){
+                    return "FELICITATS jugador 1, has guanyat!";
+                }else if (partida.vicJug2 == 3){
+                    return "FELICITATS jugador 2, has guanyat!";
+                }else{
+                    return "El jugador 1 ha escollit TISORES, el Jugador 2 PAPER. El Jugador 1 ha guanyat aquesta ronda";
+                }
+            }else if (movJug1 == "pedra" && movJug2 == "tisores") {
+                partida.vicJug1++;
+                if(partida.vicJug1 == 3){
+                    return "FELICITATS jugador 1, has guanyat!";
+                }else if (partida.vicJug2 == 3){
+                    return "FELICITATS jugador 2, has guanyat!";
+                }else{
+                    return "El jugador 1 ha escollit PEDRA, el Jugador 2 TISORES. El Jugador 1 ha guanyat aquesta ronda";
+                }
+            }else if (movJug1 == "tisores" && movJug2 == "pedra") {
+                partida.vicJug2++;
+                if(partida.vicJug1 == 3){
+                    return "FELICITATS jugador 1, has guanyat!";
+                }else if (partida.vicJug2 == 3){
+                    return "FELICITATS jugador 2, has guanyat!";
+                }else{
+                    return "El jugador 1 ha escollit TISORES, el Jugador 2 PEDRA. El Jugador 2 ha guanyat aquesta ronda";
+                }
+            }else if(movJug1 == movJug2){
+                movJug1 = "";
+                movJug2 = "";
+                partida.torn = "jug1";
+                return "Els dos jugadors heu triat "+moviment +". Es un EMPAT!";
             }
+        }    
+        else{
+            return "El jugador " + partida.torn + " ha de fer el seu moviment!";
         }
     }
 };
